@@ -1,0 +1,52 @@
+#!/usr/sbin/nft -f
+
+flush ruleset
+
+include "/usr/local/lib/nft-transproxy/nft/direct-ipv4.nft";
+#include "/usr/local/lib/nft-transproxy/nft/direct-ipv6.nft";
+
+# ipv4 tcp
+table ip nat {
+  chain proxy {
+    ip daddr $direct_ipv4 return
+    ip protocol tcp redirect to :1080
+  }
+  chain output {
+    type nat hook output priority filter; policy accept;
+    goto proxy
+  }
+  chain prerouting {
+    type nat hook prerouting priority dstnat; policy accept;
+    goto proxy
+  }
+}
+
+# ipv4 udp
+table ip mangle {
+  chain output {
+    type route hook output priority mangle; policy accept;
+    ip daddr $direct_ipv4 return
+    ip protocol udp mark set 0x233
+  }
+  chain prerouting {
+    type filter hook prerouting priority mangle; policy accept;
+    ip daddr $direct_ipv4 return
+    ip protocol udp tproxy to 127.0.0.1:1080
+  }
+}
+
+# ipv6 in ipv4
+#table ip6 nat {
+#  chain proxy {
+#    ip6 daddr $direct_ipv6 return
+#    ip6 nexthdr { tcp } redirect to :1080
+#  }
+#  chain output {
+#    type nat hook output priority filter; policy accept;
+#    goto proxy
+#  }
+#  chain prerouting {
+#    type nat hook prerouting priority dstnat; policy accept;
+#    goto proxy
+#  }
+#}
