@@ -1,0 +1,12 @@
+[Unit]
+Description=nft & ip rule for TCP/UDP TPROXY
+After=network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/ip rule add fwmark 0x233 lookup 100 ; /sbin/ip route add local 0.0.0.0/0 dev lo table 100 ; /usr/bin/nft --file /usr/local/lib/nft-transproxy/nft/transproxy.nft
+ExecStop=/usr/bin/ip rule del fwmark 0x233 lookup 100 ; /sbin/ip route del local 0.0.0.0/0 dev lo table 100 ; /usr/bin/nft flush ruleset
+
+[Install]
+WantedBy=multi-user.target
