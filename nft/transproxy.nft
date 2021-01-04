@@ -5,26 +5,31 @@ flush ruleset
 include "/usr/local/lib/nft-transproxy/nft/direct-ipv4.nft";
 include "/usr/local/lib/nft-transproxy/nft/direct-ipv6.nft";
 
-# ipv4 tcp
-table ip nat {
+# tproxy ipv4 tcp&udp
+table ip ss_redir {
+  set direct_address {
+    type ipv4_addr
+    flags interval
+    auto-merge
+    elements = $direct_ipv4
+  }
   chain output {
-    type nat hook output priority filter; policy accept;
-    ip daddr $direct_ipv4 return
-    ip protocol tcp redirect to :1080
+    type route hook output priority filter;
+    ip daddr @direct_address return
+    meta l4proto { tcp, udp } meta mark set 0x233 accept
+  }
+  chain prerouting {
+    type filter hook prerouting priority filter;
+    ip daddr @direct_address return
+    meta l4proto { tcp, udp } mark set 0x233 tproxy to 127.0.0.1:1080 accept
   }
 }
 
-# ipv4 udp
-table ip mangle {
-  chain output {
-    type route hook output priority mangle; policy accept;
-    ip daddr $direct_ipv4 return
-    ip protocol udp mark set 0x233
-  }
-  chain prerouting {
-    type filter hook prerouting priority mangle; policy accept;
-    ip daddr $direct_ipv4 return
-    ip protocol udp tproxy to 127.0.0.1:1080
+# divert
+table ip filter {
+  chain divert {
+    type filter hook prerouting priority mangle;
+    meta l4proto tcp socket transparent 1 meta mark set 0x233 accept
   }
 }
 
