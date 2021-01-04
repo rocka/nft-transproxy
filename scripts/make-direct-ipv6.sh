@@ -10,8 +10,7 @@ BYPASS_ROUTE_FILES=(
 
 # chnroutes url
 BYPASS_ROUTE_URLS=(
-#https://raw.githubusercontent.com/PaPerseller/chn-iplist/master/chnroute-ipv6.txt
-https://cdn.jsdelivr.net/gh/PaPerseller/chn-iplist/chnroute-ipv6.txt
+https://raw.githubusercontent.com/PaPerseller/chn-iplist/master/chnroute-ipv6.txt
 )
 
 # additional bypass ip

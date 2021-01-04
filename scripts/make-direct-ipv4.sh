@@ -6,14 +6,12 @@ BYPASS_IPS=(
 
 # /path/to/chnroutes.txt 
 BYPASS_ROUTE_FILES=(
-/usr/share/chnroutes2/chnroutes.txt
-/usr/share/chnroutes-alike/chnroutes-alike.txt
 )
 
 # chnroutes url
 BYPASS_ROUTE_URLS=(
-#https://github.com/misakaio/chnroutes2/raw/master/chnroutes.txt
-#https://github.com/felixonmars/chnroutes-alike/blob/master/chnroutes-alike.txt
+https://github.com/misakaio/chnroutes2/raw/master/chnroutes.txt
+https://github.com/felixonmars/chnroutes-alike/blob/master/chnroutes-alike.txt
 )
 
 # private ipv4 address
