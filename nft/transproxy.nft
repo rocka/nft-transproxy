@@ -26,18 +26,29 @@ table ip ss_redir {
 }
 
 # divert
-table ip filter {
+table inet filter {
   chain divert {
     type filter hook prerouting priority mangle;
     meta l4proto tcp socket transparent 1 meta mark set 0x233 accept
   }
 }
 
-# ipv6 in ipv4
-table ip6 nat {
+# tproxy ipv6 tcp&udp
+table ip6 ss_redir6 {
+  set direct_address6 {
+    type ipv6_addr
+    flags interval
+    auto-merge
+    elements = $direct_ipv6
+  }
   chain output {
-    type nat hook output priority filter; policy accept;
-    ip6 daddr $direct_ipv6 return
-    ip6 nexthdr { tcp } redirect to :1080
+    type route hook output priority filter;
+    ip6 daddr @direct_address6 return
+    meta l4proto { tcp, udp } meta mark set 0x233 accept
+  }
+  chain prerouting {
+    type filter hook prerouting priority filter;
+    ip6 daddr @direct_address6 return
+    meta l4proto { tcp, udp } mark set 0x233 tproxy to :1080 accept
   }
 }
