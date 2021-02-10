@@ -18,6 +18,8 @@ BYPASS_IPS+=(
 ::/128
 ::1/128
 fc00::/7
+fe80::/10
+ff00::/8
 )
 
 SCRIPT_PATH=$(dirname "${BASH_SOURCE[0]}")
