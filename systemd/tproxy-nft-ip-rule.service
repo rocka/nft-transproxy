@@ -5,8 +5,20 @@ After=network.target
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/bin/ip rule add fwmark 0x233 lookup 100 ; /sbin/ip route add local 0.0.0.0/0 dev lo table 100 ; /usr/bin/nft --file /usr/local/lib/nft-transproxy/nft/transproxy.nft
-ExecStop=/usr/bin/ip rule del fwmark 0x233 lookup 100 ; /sbin/ip route del local 0.0.0.0/0 dev lo table 100 ; /usr/bin/nft flush ruleset
+# start
+ExecStart=/usr/bin/nft --file /usr/local/lib/nft-transproxy/nft/transproxy.nft
+ExecStartPost=/usr/bin/ip rule add fwmark 0x233 lookup 100
+ExecStartPost=/usr/bin/ip route add local 0.0.0.0/0 dev lo table 100
+ExecStartPost=/usr/bin/ip -6 rule add fwmark 0x233 lookup 100
+ExecStartPost=/usr/bin/ip -6 route add local ::/0 dev lo table 100
+# reload
+ExecReload=/usr/bin/nft --file /usr/local/lib/nft-transproxy/nft/transproxy.nft
+# stop
+ExecStop=/usr/bin/nft flush ruleset
+ExecStopPost=/usr/bin/ip rule del fwmark 0x233 lookup 100
+ExecStopPost=/usr/bin/ip route del local 0.0.0.0/0 dev lo table 100
+ExecStopPost=/usr/bin/ip -6 rule del fwmark 0x233 lookup 100
+ExecStopPost=/usr/bin/ip -6 route del ::/0 dev lo table 100
 
 [Install]
 WantedBy=multi-user.target
