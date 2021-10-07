@@ -6,7 +6,7 @@ include "/usr/local/lib/nft-transproxy/nft/direct-ipv4.nft";
 include "/usr/local/lib/nft-transproxy/nft/direct-ipv6.nft";
 
 # tproxy ipv4 tcp&udp
-table ip ss_redir {
+table ip ipv4_tproxy {
   set direct_address {
     type ipv4_addr
     flags interval
@@ -14,27 +14,19 @@ table ip ss_redir {
     elements = $direct_ipv4
   }
   chain output {
-    type route hook output priority filter;
-    ip daddr @direct_address return
-    meta l4proto { tcp, udp } meta mark set 0x233 accept
+    type route hook output priority mangle
+    ip daddr @direct_address accept
+    meta l4proto { tcp, udp } mark set 0x233 accept
   }
   chain prerouting {
-    type filter hook prerouting priority filter;
-    ip daddr @direct_address return
-    meta l4proto { tcp, udp } mark set 0x233 tproxy to 127.0.0.1:1080 accept
-  }
-}
-
-# divert
-table inet filter {
-  chain divert {
-    type filter hook prerouting priority mangle;
-    meta l4proto tcp socket transparent 1 meta mark set 0x233 accept
+    type filter hook prerouting priority filter
+    meta l4proto tcp socket transparent 1 meta mark 0x233 accept
+    meta l4proto { tcp, udp } mark 0x233 tproxy to :1080
   }
 }
 
 # tproxy ipv6 tcp&udp
-table ip6 ss_redir6 {
+table ip6 ipv6_tproxy {
   set direct_address6 {
     type ipv6_addr
     flags interval
@@ -42,13 +34,13 @@ table ip6 ss_redir6 {
     elements = $direct_ipv6
   }
   chain output {
-    type route hook output priority filter;
-    ip6 daddr @direct_address6 return
-    meta l4proto { tcp, udp } meta mark set 0x233 accept
+    type route hook output priority mangle
+    ip6 daddr @direct_address6 accept
+    meta l4proto { tcp, udp } mark set 0x233 accept
   }
   chain prerouting {
-    type filter hook prerouting priority filter;
-    ip6 daddr @direct_address6 return
-    meta l4proto { tcp, udp } mark set 0x233 tproxy to :1080 accept
+    type filter hook prerouting priority filter
+    meta l4proto tcp socket transparent 1 mark 0x233 accept
+    meta l4proto { tcp, udp } mark 0x233 tproxy to :1080
   }
 }
