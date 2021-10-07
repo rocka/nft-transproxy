@@ -18,7 +18,7 @@ ExecStop=/usr/bin/nft flush ruleset
 ExecStopPost=/usr/bin/ip rule del fwmark 0x233 lookup 100
 ExecStopPost=/usr/bin/ip route del local 0.0.0.0/0 dev lo table 100
 ExecStopPost=/usr/bin/ip -6 rule del fwmark 0x233 lookup 100
-ExecStopPost=/usr/bin/ip -6 route del ::/0 dev lo table 100
+ExecStopPost=/usr/bin/ip -6 route del local ::/0 dev lo table 100
 
 [Install]
 WantedBy=multi-user.target
